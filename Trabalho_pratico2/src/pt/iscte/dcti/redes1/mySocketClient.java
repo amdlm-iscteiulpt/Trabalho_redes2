@@ -1,4 +1,4 @@
-package lab5;
+package pt.iscte.dcti.redes1;
 
 
 import java.io.IOException;

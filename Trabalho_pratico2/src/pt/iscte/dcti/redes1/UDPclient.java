@@ -2,21 +2,20 @@ package pt.iscte.dcti.redes1;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class ClientApp extends Thread {
-//oiikkkjkjcs
+public class UDPclient {
+
 	public static void main(String[] args) {
-		System.out.println(args[0]);
-		final double ARRIVAL_RATE = Double.parseDouble(args[0]);
 		
         // Local SAP - lo; SAP destino . 
 		// Local socket - localSocket
 		InetSocketAddress lo = null;
-		mySocketClient localSocket = null;
+		DatagramSocket localSocket = null;
 		
         try {
         	// Identificação do SAP local
@@ -24,19 +23,22 @@ public class ClientApp extends Thread {
         	lo = new InetSocketAddress(loIP, 20000);
 
         	// Criação e binding do soket 
-			localSocket = new mySocketClient(lo);
+			localSocket = new DatagramSocket(lo);
 			System.out.println("LocalIP: "+localSocket.getLocalAddress().toString());
 			System.out.println("LocalPort: "+localSocket.getLocalPort());
-	    } catch (UnknownHostException e) {	
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	    } catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 		}
         
-		// Envio de 25 mensagens ('A' a 'Y')- com um tamanho de 100 bytes cada
-		for (int i=0; i<25; i++) {
-			byte[] data = new byte[100];
-			for (int j=0; j<100; j++) {
-				data[j]=(byte)(i+'A');
+		// Envio de 10 mensagens - datagramas UDP - com um tamanho de 10000 bytes cada
+		for (int i=0; i<10; i++) {
+			byte[] data = new byte[10000];
+			for (int j=0; j<10000; j++) {
+				data[j]=(byte)i;
 			}
 			try {
 	        	// Identificação do SAP destino
@@ -50,22 +52,14 @@ public class ClientApp extends Thread {
 				localSocket.send(p);
         		long endTime = System.currentTimeMillis();        		
 				
-				System.out.println("Colocados no SAP "+p.getLength()+" bytes com destino a "
+				System.out.println("Enviados "+p.getLength()+" bytes com destino a "
 						           +p.getAddress().toString()+":"+p.getPort() + " em "+
 						           (endTime-beginTime) + " miliseg");
-
-				double interval;
-			    // Tempo de espera entre gerações de pacotes - D (intervalo fixo)
-			    interval = (1.0/ARRIVAL_RATE);
-			    // Tempo de espera entre gerações de pacotes - M (intervalo exponencial negativo)
-				//interval = -1.0/ARRIVAL_RATE*Math.log(Math.random());
-				sleep((long)(interval*1000.0)); // Conversão para miliseg.
-
-			} catch (IOException e) {
+			} catch (SocketException e) {
 				e.printStackTrace();
-			} catch (InterruptedException e) {
+			}  catch (IOException e) {
 				e.printStackTrace();
-			}
+			}			
 		}
 	}
 }
